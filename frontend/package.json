@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "concurrently \"next build\" \"node src/server.js\"",
+    "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start"

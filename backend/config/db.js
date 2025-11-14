@@ -1,18 +1,30 @@
-import pg from "pg"
-import { configDotenv } from "dotenv";
+import pg from 'pg';
+import dotenv from 'dotenv';
 
-load_dotenv()
-const Client = pg;
-const db = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'Fitspiration',
-    password: process.env.db_password, 
-    port: 5050,
-})
+dotenv.config();
 
-db.on("connect", () => {
-    console.log("connected to postgreSQL")
-})
+const { Pool } = pg;
 
-export default db;
+const dbUser = process.env.DB_USER || process.env.db_user || 'postgres';
+const dbHost = process.env.DB_HOST || process.env.db_host || 'localhost';
+const dbName = process.env.DB_NAME || process.env.db_name || 'Fitspiration';
+const dbPassword = process.env.DB_PASSWORD || process.env.db_password || '';
+const dbPort = Number(process.env.DB_PORT || process.env.db_port) || 5432;
+
+const pool = new Pool({
+    user: dbUser,
+    host: dbHost,
+    database: dbName,
+    password: dbPassword,
+    port: dbPort,
+});
+
+pool.on('connect', () => {
+    console.log('connected to postgreSQL');
+});
+
+pool.on('error', (err) => {
+    console.error('Postgres pool error', err);
+});
+
+export default pool;

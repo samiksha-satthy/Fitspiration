@@ -18,11 +18,13 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log("SUBMIT CLICKED!") 
     setIsLoading(true)
 
     // Placeholder API call
     try {
-      const response = await fetch("/api/auth/signup", {
+      console.log("why hello there")
+      const response = await fetch("http://localhost:5000/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
