@@ -1,22 +1,36 @@
 import express from "express";
 import pool from "../config/db.js";
 import bcrypt from "bcrypt";
+import passport from "passport";
+import { Strategy } from "passport-local";
+import session from "express-session";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const router = express.Router();
 const saltRounds = 10;
 
+router.get("/me", async (req, res) => {
+  try {
+    console.log("hey!!!");
+    if (req.isAuthenticated()) {
+      return res.status(200);
+    }
+  } catch (error) {
+    return res.status(400);
+  }
+});
+
 router.post("/signup", async (req, res) => {
   try {
-    console.log("heyyy")
     const result = await pool.query(`SELECT * FROM users WHERE email=$1`, [
       req.body.email,
     ]);
 
-    // console.log(result)
-
     if (result.rows.length != 0) {
       console.log("email already exists!");
-      res.send()
+      res.sendStatus(400);
     } else {
       bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
         if (err) {
@@ -26,9 +40,7 @@ router.post("/signup", async (req, res) => {
             `INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *`,
             [req.body.name, req.body.email, hash]
           );
-
-          console.log(response.rows[0].password);
-          res.send()
+          return res.sendStatus(200);
         }
       });
     }
@@ -37,27 +49,57 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
-  try {
-    console.log("haro?");
-    const response = await pool.query(
-      `SELECT password FROM users WHERE email=($1)`,
-      [req.body.email]
-    );
-
-    if (!response.rows || response.rows.length === 0) {
-      console.log("login: no user found for", req.body.email);
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    if (response.rows[0].password == req.body.password) {
-      console.log("worked!");
-    } else {
-      console.log("heheh nope");
-    }
-  } catch (error) {
-    console.log(error);
+router.post(
+  "/login",
+  passport.authenticate("local", { session: true }),
+  (req, res) => {
+    return res.sendStatus(200);
   }
+);
+
+passport.use(
+  new Strategy(
+    { usernameField: "email", passwordField: "password" },
+    async function verify(email, password, cb) {
+      try {
+        console.log(email, password);
+        const response = await pool.query(
+          `SELECT password FROM users WHERE email=($1)`,
+          [email]
+        );
+
+        const user = response.rows[0];
+
+        if (!response.rows || response.rows.length === 0) {
+          console.log("login: no user found for", email);
+          return cb(null, false);
+        }
+
+        bcrypt.compare(password, response.rows[0].password, (err, result) => {
+          console.log(result);
+          if (err) {
+            return cb(err);
+          }
+          if (result) {
+            console.log("this runs");
+            return cb(null, user);
+          } else {
+            return cb(null, false);
+          }
+        });
+      } catch (error) {
+        return cb(error);
+      }
+    }
+  )
+);
+
+passport.serializeUser((user, cb) => {
+  cb(null, user);
+});
+
+passport.deserializeUser((user, cb) => {
+  cb(null, user);
 });
 
 export default router;

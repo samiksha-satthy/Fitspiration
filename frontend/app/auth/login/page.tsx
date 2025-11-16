@@ -9,11 +9,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Shirt } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,7 +29,10 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
       // Handle response when backend is ready
-      console.log("Login response:", response)
+      console.log(response.status)
+      if (response.status == 200){
+        router.push("/recommendations")
+      }
     } catch (error) {
       console.error("Login error:", error)
     } finally {

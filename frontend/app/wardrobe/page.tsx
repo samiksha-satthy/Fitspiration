@@ -8,6 +8,7 @@ import { Shirt, Plus, Home, Sparkles, Filter } from "lucide-react"
 import { AddItemDialog } from "@/components/wardrobe/add-item-dialog"
 import { WardrobeFilters } from "@/components/wardrobe/wardrobe-filters"
 import type { WardrobeItem } from "@/types/wardrobe"
+import {useRouter} from "next/navigation"
 
 export default function WardrobePage() {
   const [items, setItems] = useState<WardrobeItem[]>([])
@@ -19,6 +20,26 @@ export default function WardrobePage() {
     season: "",
     style: "",
   })
+  const router = useRouter()
+  
+    useEffect(() => {
+      const checkAuth = async () => {
+        try{
+          const res = await fetch("http://localhost:5000/auth/me", {
+            method: "GET",
+            credentials: "include", 
+          })
+  
+  
+          if (!res.ok){
+            router.push("/auth/login")
+          }
+        }catch{
+            router.push("/auth/login")
+          }
+      }
+      checkAuth()
+    }, [])
 
   useEffect(() => {
     // Placeholder API call to fetch wardrobe items

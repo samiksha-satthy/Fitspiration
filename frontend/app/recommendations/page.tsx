@@ -1,12 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Shirt, Home, Sparkles, Search } from "lucide-react"
+import {useRouter} from "next/navigation"
 
 type Outfit = {
   id: string
@@ -22,6 +23,26 @@ export default function RecommendationsPage() {
   const [event, setEvent] = useState("")
   const [recommendations, setRecommendations] = useState<Outfit[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try{
+        const res = await fetch("http://localhost:5000/api/auth/me", {
+          method: "GET",
+          credentials: "include", 
+        })
+        console.log(res.status)
+
+        if (res.status != 200){
+          router.push("/auth/login")
+        }
+      }catch{
+          router.push("/auth/login")
+        }
+    }
+    checkAuth()
+  }, [])
 
   const handleGetRecommendations = async () => {
     if (!event.trim()) return
@@ -30,7 +51,7 @@ export default function RecommendationsPage() {
 
     // Placeholder API call
     try {
-      const response = await fetch("/api/recommendations", {
+      const response = await fetch("http://localhost:5000/api/recommendations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ event }),
