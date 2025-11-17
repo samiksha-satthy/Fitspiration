@@ -22,24 +22,24 @@ export default function WardrobePage() {
   })
   const router = useRouter()
   
-    useEffect(() => {
-      const checkAuth = async () => {
-        try{
-          const res = await fetch("http://localhost:5000/auth/me", {
-            method: "GET",
-            credentials: "include", 
-          })
+    // useEffect(() => {
+    //   const checkAuth = async () => {
+    //     try{
+    //       const res = await fetch("http://localhost:5000/auth/me", {
+    //         method: "GET",
+    //         credentials: "include", 
+    //       })
   
   
-          if (!res.ok){
-            router.push("/auth/login")
-          }
-        }catch{
-            router.push("/auth/login")
-          }
-      }
-      checkAuth()
-    }, [])
+    //       if (!res.ok){
+    //         router.push("/auth/login")
+    //       }
+    //     }catch{
+    //         router.push("/auth/login")
+    //       }
+    //   }
+    //   checkAuth()
+    // }, [])
 
   useEffect(() => {
     // Placeholder API call to fetch wardrobe items

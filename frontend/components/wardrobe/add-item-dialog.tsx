@@ -26,8 +26,30 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
     imageUrl: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [name, setName] = useState("");
+  const [type, setType] = useState("");
+  const [color, setColor] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!selectedFile){
+      alert("please choose an image")
+      return 
+    }
+
+    const uploadData = new FormData()
+    uploadData.append("myFile", selectedFile)
+    
+
+    const res = await fetch("http://localhost:5000/upload-item", {
+      method: "POST",
+      body: uploadData,
+      credentials: "include",
+    })
+
+    console.log(res);
 
     const imageUrl =
       formData.imageUrl || `/placeholder.svg?height=300&width=300&query=${encodeURIComponent(formData.name)}`
@@ -155,6 +177,17 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+            
+          <div className="space-y-2">
+            <Label htmlFor="file">Upload Image (optional)</Label>
+            <Input
+              id="file"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            />
           </div>
 
           <div className="space-y-2">

@@ -6,12 +6,13 @@ import authRoutes from "./routes/authRoutes.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
 import wardrobeRoutes from "./routes/wardrobeRoutes.js";
 import passport from "passport";
-import { Strategy } from "passport-local";
+import multer from "multer";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 5000;
+
 
 app.use(express.json());
 
