@@ -63,7 +63,7 @@ passport.use(
       try {
         console.log(email, password);
         const response = await pool.query(
-          `SELECT password FROM users WHERE email=($1)`,
+          `SELECT password, id FROM users WHERE email=($1)`,
           [email]
         );
 
@@ -94,11 +94,21 @@ passport.use(
 );
 
 passport.serializeUser((user, cb) => {
-  cb(null, user);
+  console.log("Serialize user:", user);
+  cb(null, user.id);
 });
 
-passport.deserializeUser((user, cb) => {
-  cb(null, user);
+passport.deserializeUser(async(id, cb) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, email FROM users WHERE id = $1", [id]
+    )
+
+    if (!result.rows[0]) return cb(null, false);
+    cb(null, result.rows[0])
+  } catch (error) {
+    cb(error)
+  }
 });
 
 export default router;
