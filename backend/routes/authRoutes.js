@@ -13,7 +13,6 @@ const saltRounds = 10;
 
 router.get("/me", async (req, res) => {
   try {
-    console.log("hey!!!");
     if (req.isAuthenticated()) {
       return res.status(200);
     }
