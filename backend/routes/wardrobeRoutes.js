@@ -2,6 +2,8 @@ import express from "express";
 import multer from "multer";
 import pool from "../config/db.js";
 import fs from "fs";
+import { ChildProcess } from "child_process";
+import { spawn } from "child_process";
 
 const router = express.Router();
 const uploadDir = "./uploads";
@@ -25,6 +27,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+
 router.post("/upload-item", upload.single("myFile"), async (req, res) => {
 
   try {
@@ -38,7 +41,17 @@ router.post("/upload-item", upload.single("myFile"), async (req, res) => {
       [req.user.id, req.body.name, req.file.filename]
     );
 
-    
+
+    const convert_base64 = spawn('python', ['cohere_test.py', `${response}/${req.file.filename}`])
+
+    convert_base64.stdout.on('data', (data, err) => {
+        if (err)
+          throw new err
+        else {
+          const get_embedding = spawn('python', ['cohere_test.py', data])
+        }
+    });
+
 
     res.send(response);
 
