@@ -5,6 +5,7 @@ import os
 import base64
 from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec
+import uuid
 
 load_dotenv()
 
@@ -49,11 +50,11 @@ def get_image_embedding(base64string: str, image_format: str):
         inputs=image_inputs, 
     )
 
-    return response.embeddings.float[0]
+    return [response.embeddings.float[0]]
 
-def save_db(embeddings):
-    index_name = "my_index"
-    dimension = 768
+def save_db(embeddings, user_name: str, user_id: str, image_path):
+    index_name = "fitspiration"
+    dimension = 1536
     metric = "cosine"
     
     if index_name not in pc.list_indexes().names():
@@ -67,8 +68,32 @@ def save_db(embeddings):
     index = pc.Index(index_name)
     
     vectors_to_upsert = [
-        {"id": f"doc_{i}", "values": vec} for i, vec in enumerate(embeddings)
+        {"id": f"{user_id}_{uuid.uuid4()}", "values": vec, "metadata": {"image_url": image_path}} for i, vec in enumerate(embeddings)
     ]
+    namespace = f"{user_name}-{user_id}"
+    index.upsert(vectors=vectors_to_upsert, namespace=namespace)
     
-    index.upsert(vectors=vectors_to_upsert)
     
+    stats = index.describe_index_stats()
+    print(stats)
+
+    
+    result = index.query(
+        vector=embeddings[0],  # or any query vector
+        top_k=10,
+        namespace=namespace,
+        include_values=False,
+        include_metadata=True
+    )
+    print(result)
+
+
+    
+    return "success!"
+    
+def main(image_path: str, image_format: str, user_name: str, user_id: str):
+    base64 = convert_base64(image_path)
+    embeddings = get_image_embedding(base64, image_format)
+    return save_db(embeddings, user_name, user_id, image_path)
+    
+pc.delete_index("fitspiration")

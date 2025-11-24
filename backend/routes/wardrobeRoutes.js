@@ -41,19 +41,13 @@ router.post("/upload-item", upload.single("myFile"), async (req, res) => {
       [req.user.id, req.body.name, req.file.filename]
     );
 
-
-    const convert_base64 = spawn('python', ['cohere_test.py', `${response}/${req.file.filename}`])
-
-    convert_base64.stdout.on('data', (data, err) => {
-        if (err)
-          throw new err
-        else {
-          const get_embedding = spawn('python', ['cohere_test.py', data])
-        }
-    });
+    first_part = req.user.name.split()[0].lower()
 
 
-    res.send(response);
+    const save_to_db = spawn('python', ['cohere_test.py', `${response}/${req.file.filename}`, "jpg", first_part, req.user.id])
+
+
+    res.send(save_to_db);
 
 
 
