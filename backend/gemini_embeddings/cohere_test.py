@@ -6,6 +6,7 @@ import base64
 from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec
 import uuid
+import sys
 
 load_dotenv()
 
@@ -95,5 +96,11 @@ def main(image_path: str, image_format: str, user_name: str, user_id: str):
     base64 = convert_base64(image_path)
     embeddings = get_image_embedding(base64, image_format)
     return save_db(embeddings, user_name, user_id, image_path)
-    
-pc.delete_index("fitspiration")
+
+
+if __name__ == "__main__":
+    image_path = sys.argv[1]
+    image_format = sys.argv[2]
+    user_name = sys.argv[3]
+    user_id = sys.argv[4]
+    main(image_path, image_format, user_name, user_id)
