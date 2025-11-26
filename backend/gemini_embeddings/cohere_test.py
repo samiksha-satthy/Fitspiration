@@ -55,7 +55,7 @@ def get_image_embedding(base64string: str, image_format: str):
 
 def save_db(embeddings, user_name: str, user_id: str, image_path):
     index_name = "fitspiration"
-    dimension = 1024
+    dimension = 1536
     metric = "cosine"
     
     if index_name not in pc.list_indexes().names():
