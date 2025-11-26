@@ -55,7 +55,7 @@ def get_image_embedding(base64string: str, image_format: str):
 
 def save_db(embeddings, user_name: str, user_id: str, image_path):
     index_name = "fitspiration"
-    dimension = 1536
+    dimension = 1024
     metric = "cosine"
     
     if index_name not in pc.list_indexes().names():
@@ -88,15 +88,12 @@ def save_db(embeddings, user_name: str, user_id: str, image_path):
     )
     print(result)
 
-
-    
     return "success!"
     
 def main(image_path: str, image_format: str, user_name: str, user_id: str):
     base64 = convert_base64(image_path)
     embeddings = get_image_embedding(base64, image_format)
     return save_db(embeddings, user_name, user_id, image_path)
-
 
 if __name__ == "__main__":
     image_path = sys.argv[1]
