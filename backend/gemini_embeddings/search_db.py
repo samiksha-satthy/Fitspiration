@@ -20,6 +20,7 @@ def search_db(namespace, query):
 
     index = pc.Index(index_name)
 
+    #embed query
     query_embedding_response = client.embeddings.create(
         model="text-embedding-3-small", input=query
     )

@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec
 import uuid
 import sys
+from nomic import embed
+import numpy as np
 
 load_dotenv()
 
