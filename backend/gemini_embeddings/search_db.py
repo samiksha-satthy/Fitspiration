@@ -3,14 +3,15 @@ from pinecone import Pinecone
 import os
 from dotenv import load_dotenv
 import sys
+import torch
+from PIL import Image
+import requests
+from transformers import AutoProcessor, CLIPModel
 
 load_dotenv()
 
 
 def search_db(namespace, query):
-
-    # Initialize Cohere client
-    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     # Initialize Pinecone client
     pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
@@ -21,10 +22,14 @@ def search_db(namespace, query):
     index = pc.Index(index_name)
 
     #embed query
-    query_embedding_response = client.embeddings.create(
-        model="text-embedding-3-small", input=query
-    )
-    query_vector = query_embedding_response.data[0].embedding
+    model_name = "openai/clip-vit-base-patch32" # or "openai/clip-vit-large-patch14" for better performance
+    model = CLIPModel.from_pretrained(model_name)
+    processor = AutoProcessor.from_pretrained(model_name)
+    
+    inputs = processor(text=query, return_tensors="pt", padding=True)
+    with torch.no_grad():
+        text_features = model.get_text_features(**inputs)
+    query_vector = [text_features[0].cpu().numpy().tolist()]
 
     # Query Pinecone
     search_results = index.query(

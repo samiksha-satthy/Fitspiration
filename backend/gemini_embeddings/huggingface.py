@@ -23,6 +23,8 @@ outputs = model(**inputs)
 image_embeds = outputs.image_embeds # shape: (1, embedding_dim)
 text_embeds = outputs.text_embeds   # shape: (num_texts, embedding_dim)
 
+print(outputs.text_embeds)
+
 # 4. Calculate the similarity score
 # Hugging Face's CLIP model automatically computes the logit similarity for you in the outputs
 logits_per_image = outputs.logits_per_image 

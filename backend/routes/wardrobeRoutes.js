@@ -90,7 +90,6 @@ router.post("/upload-item", authMiddleware, upload.single("myFile"), async (req,
       "-u",
       scriptPath,
       image_path,
-      "jpg",
       first_part,
       req.user.id,
     ], { cwd: path.resolve(__dirname, "../gemini_embeddings") });
