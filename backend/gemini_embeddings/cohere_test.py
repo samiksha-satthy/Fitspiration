@@ -38,7 +38,7 @@ def get_image_embedding(image_path):
     return [image_features[0].cpu().numpy().tolist()]
     
 
-def save_db(embeddings, user_name: str, user_id: str, image_path):
+def save_db(embeddings, user_name: str, user_id: str, image_path, clothing_type):
     index_name = "fitspiration"
     dimension = 512
     metric = "cosine"
@@ -54,7 +54,7 @@ def save_db(embeddings, user_name: str, user_id: str, image_path):
     index = pc.Index(index_name)
     
     vectors_to_upsert = [
-        {"id": f"{user_id}_{uuid.uuid4()}", "values": vec, "metadata": {"image_path": image_path}} for i, vec in enumerate(embeddings)
+        {"id": f"{user_id}_{uuid.uuid4()}", "values": vec, "metadata": {"image_path": image_path, "type": clothing_type}} for i, vec in enumerate(embeddings)
     ]
     namespace = f"{user_name}-{user_id}"
     index.upsert(vectors=vectors_to_upsert, namespace=namespace)
@@ -75,18 +75,17 @@ def save_db(embeddings, user_name: str, user_id: str, image_path):
 
     return "success!"
     
-def main(image_path: str, user_name: str, user_id: str):
+def main(image_path: str, user_name: str, user_id: str, clothing_type: str):
     embeddings = get_image_embedding(image_path)
-    return save_db(embeddings, user_name, user_id, image_path)
+    return save_db(embeddings, user_name, user_id, image_path, clothing_type)
 
 if __name__ == "__main__":
     image_path = sys.argv[1]
     user_name = sys.argv[2]
     user_id = sys.argv[3]
-    main(image_path, user_name, user_id)
+    clothing_type = sys.argv[4]
+    main(image_path, user_name, user_id, clothing_type)
     index = pc.Index("fitspiration")
     stats = index.describe_index_stats()
     print(stats)
-    
-
 
