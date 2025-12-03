@@ -31,7 +31,7 @@ export default function LoginPage() {
       // Handle response when backend is ready
       console.log(response.status)
       if (response.status == 200){
-        router.push("/recommendations")
+        router.push("/wardrobe")
       }
     } catch (error) {
       console.error("Login error:", error)

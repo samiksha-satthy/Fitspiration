@@ -21,65 +21,40 @@ export default function WardrobePage() {
     style: "",
   })
   const router = useRouter()
+  const base = "http://localhost:5000/"
   
-    // useEffect(() => {
-    //   const checkAuth = async () => {
-    //     try{
-    //       const res = await fetch("http://localhost:5000/auth/me", {
-    //         method: "GET",
-    //         credentials: "include", 
-    //       })
+    useEffect(() => {
+      const checkAuth = async () => {
+        try{
+          const res = await fetch("http://localhost:5000/api/auth/me", {
+            method: "GET",
+            credentials: "include", 
+          })
   
   
-    //       if (!res.ok){
-    //         router.push("/auth/login")
-    //       }
-    //     }catch{
-    //         router.push("/auth/login")
-    //       }
-    //   }
-    //   checkAuth()
-    // }, [])
+          if (!res.ok){
+            router.push("/auth/login")
+          }
+        }catch{
+            router.push("/auth/login")
+          }
+      }
+      checkAuth()
+    }, [])
 
   useEffect(() => {
     // Placeholder API call to fetch wardrobe items
     const fetchItems = async () => {
       try {
-        const response = await fetch("/api/wardrobe")
+        const response = await fetch("http://localhost:5000/api/items", {
+            method: "GET",
+            credentials: "include", 
+          })
         // Handle response when backend is ready
         console.log("Fetch items response:", response)
-
-        // Mock data for demonstration
-        const mockItems: WardrobeItem[] = [
-          {
-            id: "1",
-            name: "Classic White Shirt",
-            type: "Top",
-            color: "White",
-            style: "Formal",
-            season: "All Season",
-            imageUrl: "/white-formal-shirt.png",
-          },
-          {
-            id: "2",
-            name: "Blue Denim Jeans",
-            type: "Bottom",
-            color: "Blue",
-            style: "Casual",
-            season: "All Season",
-            imageUrl: "/blue-denim-jeans.png",
-          },
-          {
-            id: "3",
-            name: "Black Leather Jacket",
-            type: "Outerwear",
-            color: "Black",
-            style: "Edgy",
-            season: "Fall/Winter",
-            imageUrl: "/black-leather-jacket.png",
-          },
-        ]
-        setItems(mockItems)
+        
+        const data = await response.json();
+        setItems(data);
       } catch (error) {
         console.error("Error fetching items:", error)
       }
@@ -100,9 +75,6 @@ export default function WardrobePage() {
 
   const filteredItems = items.filter((item) => {
     if (filters.type && item.type !== filters.type) return false
-    if (filters.color && item.color !== filters.color) return false
-    if (filters.season && item.season !== filters.season) return false
-    if (filters.style && item.style !== filters.style) return false
     return true
   })
 
@@ -179,8 +151,8 @@ export default function WardrobePage() {
               <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-square bg-muted relative">
                   <img
-                    src={item.imageUrl || "/placeholder.svg"}
-                    alt={item.name}
+                    src={`${base}${item.imageUrl ?? ""}`}
+                    alt={item.name || "clothing"}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -188,9 +160,6 @@ export default function WardrobePage() {
                   <h3 className="font-medium mb-2">{item.name}</h3>
                   <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                     <span className="px-2 py-1 rounded-full bg-muted">{item.type}</span>
-                    <span className="px-2 py-1 rounded-full bg-muted">{item.color}</span>
-                    <span className="px-2 py-1 rounded-full bg-muted">{item.style}</span>
-                    <span className="px-2 py-1 rounded-full bg-muted">{item.season}</span>
                   </div>
                 </CardContent>
               </Card>
