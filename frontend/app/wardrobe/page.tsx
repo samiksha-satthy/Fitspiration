@@ -26,7 +26,7 @@ export default function WardrobePage() {
     useEffect(() => {
       const checkAuth = async () => {
         try{
-          const res = await fetch("http://localhost:5000/api/auth/me", {
+          const res = await fetch("/api/auth/me", {
             method: "GET",
             credentials: "include", 
           })
@@ -42,26 +42,59 @@ export default function WardrobePage() {
       checkAuth()
     }, [])
 
-  useEffect(() => {
-    // Placeholder API call to fetch wardrobe items
-    const fetchItems = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/items", {
-            method: "GET",
-            credentials: "include", 
-          })
-        // Handle response when backend is ready
-        console.log("Fetch items response:", response)
-        
-        const data = await response.json();
-        setItems(data);
-      } catch (error) {
-        console.error("Error fetching items:", error)
-      }
-    }
+ 
 
-    fetchItems()
-  }, [])
+
+useEffect(() => {
+  const fetchItems = async () => {
+    console.log("[fetchItems] START");
+    try {
+      console.log("[fetchItems] 1 - before fetch()");
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => {
+        console.warn("[fetchItems] aborting after 8s timeout");
+        controller.abort();
+      }, 8000);
+
+      const response = await fetch("/api/items", {
+        method: "GET",
+        credentials: "include",
+        headers: { "Accept": "application/json" },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      console.log("[fetchItems] 2 - after fetch(), status:", response.status);
+
+      // Peek at body in case it's not JSON
+      const peek = await response.clone().text().catch(() => "(no text)");
+      console.log("[fetchItems] 3 - response text peek:", peek);
+
+      if (!response.ok) {
+        console.error("[fetchItems] non-OK:", response.status, response.statusText);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("[fetchItems] 4 - parsed JSON:", data);
+
+      // If server sends an array directly, use data. If it sends {rows}, use data.rows.
+      const rows = Array.isArray(data) ? data : data.rows;
+      setItems(rows);
+      console.log("[fetchItems] 5 - setItems done, count:", Array.isArray(rows) ? rows.length : "n/a");
+    } catch (err: any) {
+      console.error("[fetchItems] CATCH:", err?.name, err?.message, err);
+    } finally {
+      console.log("[fetchItems] END");
+    }
+  };
+
+  fetchItems();
+}, []);
+
+
+
 
   const handleAddItem = (item: Omit<WardrobeItem, "id">) => {
     // Placeholder API call to add item

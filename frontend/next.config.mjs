@@ -1,11 +1,15 @@
-/** @type {import('next').NextConfig} */
+
+
+// next.config.mjs (ESM)
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
+  async rewrites() {
+    return [
+      { source: "/api/:path*", destination: "http://localhost:5000/api/:path*" },
+      { source: "/auth/:path*", destination: "http://localhost:5000/api/auth/:path*" },
+    ];
   },
-  images: {
-    unoptimized: true,
-  },
-}
+};
+
+
 
 export default nextConfig

@@ -11,7 +11,6 @@ import { fileURLToPath } from "url";
 const router = express.Router();
 const uploadDir = "./uploads";
 
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     try {
@@ -49,7 +48,7 @@ router.post(
       if (!req.file) {
         res.send("no file uploaded ");
       }
-      var image_path = `/uploads/${req.user.id}/${req.file.filename}`
+      var image_path = `/uploads/${req.user.id}/${req.file.filename}`;
       const response = await pool.query(
         "INSERT INTO items (user_id, item_name, image_path) VALUES ($1, $2, $3)",
         [req.user.id, req.body.name || "reg photo", image_path]
@@ -82,7 +81,6 @@ router.post("/upload-item-esp32", authMiddleware, async (req, res) => {
       );
       res.send("saved!");
     });
-
   } catch (error) {
     res.status(500).send(error);
   }
@@ -90,13 +88,20 @@ router.post("/upload-item-esp32", authMiddleware, async (req, res) => {
 
 router.get("/items", async (req, res) => {
   try {
-    if (req.isAuthenticated()) {
-      const response = await pool.query(
-        "SELECT image_path FROM users WHERE user_id=($1)",
-        [req.user.id]
-      );
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+      // Not authenticated -> return 401 so the client can redirect
+      return res.status(401).json({ error: "Not authenticated" });
     }
-  } catch (error) {}
+
+    const response = await pool.query(
+      "SELECT image_path FROM items WHERE user_id=($1)",
+      [req.user.id]
+    );
+
+    return res.status(200).json(result.rows)
+  } catch (error) {
+    res.send(error);
+  }
 });
 
 router.get("/delete-item/:id", async (req, res) => {
@@ -112,7 +117,10 @@ router.patch("/update-type/:id", async (req, res) => {
         [req.body.type, req.params.id]
       );
 
-      const response = await pool.query("SELECT image_path FROM items WHERE id=($1)", [req.params.id])
+      const response = await pool.query(
+        "SELECT image_path FROM items WHERE id=($1)",
+        [req.params.id]
+      );
 
       var first_part = req.user.name.split(" ")[0].toLowerCase();
       console.log(first_part);
@@ -135,10 +143,16 @@ router.patch("/update-type/:id", async (req, res) => {
       console.log("pythonPath:", pythonPath);
       console.log("cwd:", process.cwd());
 
-
       const save_to_db = spawn(
         pythonPath,
-        ["-u", scriptPath, response.rows[0].image_path, first_part, req.user.id, req.body.type],
+        [
+          "-u",
+          scriptPath,
+          response.rows[0].image_path,
+          first_part,
+          req.user.id,
+          req.body.type,
+        ],
         { cwd: path.resolve(__dirname, "../gemini_embeddings") }
       );
 

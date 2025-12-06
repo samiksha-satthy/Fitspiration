@@ -24,7 +24,7 @@ def get_image_embedding(image_path):
     model = CLIPModel.from_pretrained(model_name)
     processor = AutoProcessor.from_pretrained(model_name)
     
-    image = Image.open(image_path)
+    image = Image.open(".."+image_path)
     
     inputs = processor(images=image, return_tensors="pt", padding=True)
     
